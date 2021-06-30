@@ -1,6 +1,10 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:edocman_demo/app/modules/home/controller.dart';
+import 'package:edocman_demo/widgets/error_dialog.dart';
+import 'package:edocman_demo/widgets/request_totp_dialog.dart';
+import 'package:edocman_demo/widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -75,10 +79,51 @@ class HomePage extends GetView<HomeController> {
                     child: Text("Kết nối với myGovVN"),
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      print("yêu cầu OTP");
+                    onPressed: () async {
+                      final secretText = _.secretController.text;
+                      final secretKey = base32.encodeString(secretText);
+                      final otp = await Get.dialog(TOTPInputDialog(
+                        label: "Nhập TOTP",
+                      ));
+                      if (otp == null) {
+                        return;
+                      }
+                      var response = await Dio().post(
+                          'http://183.91.3.60:5000/identity-api/totp/verify-totp',
+                          data: {'secretKey': secretKey, 'otp': otp});
+                      final okTotp = response.data["data"] as bool;
+                      if (okTotp) {
+                        Get.dialog(
+                          SuccessDialog(
+                            title: "Xác thực TOTP",
+                            descriptions: "Xác thực TOTP thành công.",
+                            text: "Ok",
+                          ),
+                        );
+                      } else {
+                        Get.dialog(
+                          ErrorDialog(
+                            title: "Xác thực TOTP",
+                            descriptions: "Xác thực TOTP không thành công.",
+                            text: "Ok",
+                          ),
+                        );
+                      }
                     },
                     child: Text("Yêu cầu TOTP"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final applicationId = _.applicationIdController.text;
+                      final userName = _.userNameController.text;
+                      final data = base64Encode(utf8.encode(jsonEncode({
+                        "applicationId": applicationId,
+                        "userName": userName,
+                        "deeplinkCallback": "edocman://edocman.vn?totp="
+                      })));
+                      launch("mygovvn://mygov.vn/requestTotp?data=$data");
+                    },
+                    child: Text("Yêu cầu TOTP 2"),
                   ),
                 ],
               ),
