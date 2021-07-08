@@ -74,7 +74,7 @@ class HomePage extends GetView<HomeController> {
                         "secretKey": secretKey,
                         "logo": _.logoController.text
                       })));
-                      launch("mygovvn://mygov.vn/registerTotp?data=$data");
+                      launch("totp://totp.com/registerTotp?data=$data");
                     },
                     child: Text("Kết nối với myGovVN"),
                   ),
