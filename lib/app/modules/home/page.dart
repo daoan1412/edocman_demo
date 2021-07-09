@@ -8,7 +8,6 @@ import 'package:edocman_demo/widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:base32/base32.dart';
 
 class HomePage extends GetView<HomeController> {
   @override
@@ -66,12 +65,11 @@ class HomePage extends GetView<HomeController> {
                       final applicationId = _.applicationIdController.text;
                       final userName = _.userNameController.text;
                       final secretText = _.secretController.text;
-                      final secretKey = base32.encodeString(secretText);
                       final data = base64Encode(utf8.encode(jsonEncode({
                         "name": name,
                         "applicationId": applicationId,
                         "userName": userName,
-                        "secretKey": secretKey,
+                        "secretKey": secretText,
                         "logo": _.logoController.text
                       })));
                       launch("totp://totp.com/registerTotp?data=$data");
@@ -81,7 +79,7 @@ class HomePage extends GetView<HomeController> {
                   ElevatedButton(
                     onPressed: () async {
                       final secretText = _.secretController.text;
-                      final secretKey = base32.encodeString(secretText);
+                      final secretKey = secretText;
                       final otp = await Get.dialog(TOTPInputDialog(
                         label: "Nhập TOTP",
                       ));
@@ -89,7 +87,7 @@ class HomePage extends GetView<HomeController> {
                         return;
                       }
                       var response = await Dio().post(
-                          'http://183.91.3.60:5000/identity-api/totp/verify-totp',
+                          'http://183.91.3.60:50010/api/totp/verify-totp',
                           data: {'secretKey': secretKey, 'otp': otp});
                       final okTotp = response.data["data"] as bool;
                       if (okTotp) {
@@ -121,7 +119,7 @@ class HomePage extends GetView<HomeController> {
                         "userName": userName,
                         "deeplinkCallback": "edocman://edocman.vn?totp="
                       })));
-                      launch("mygovvn://mygov.vn/requestTotp?data=$data");
+                      launch("totp://totp.com/requestTotp?data=$data");
                     },
                     child: Text("Yêu cầu TOTP 2"),
                   ),

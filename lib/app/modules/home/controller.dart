@@ -52,9 +52,9 @@ class HomeController extends GetxController {
     }
     final totp = uri.queryParameters["totp"];
     final secretText = secretController.text;
-    final secretKey = base32.encodeString(secretText);
+    final secretKey = secretText;
     var response = await Dio().post(
-        'http://183.91.3.60:5000/identity-api/totp/verify-totp',
+        'http://183.91.3.60:50010/api/totp/verify-totp',
         data: {'secretKey': secretKey, 'otp': totp});
     final okTotp = response.data["data"] as bool;
     if (okTotp) {
