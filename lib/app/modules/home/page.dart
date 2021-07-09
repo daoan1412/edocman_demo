@@ -74,7 +74,7 @@ class HomePage extends GetView<HomeController> {
                       })));
                       launch("totp://totp.com/registerTotp?data=$data");
                     },
-                    child: Text("Kết nối với myGovVN"),
+                    child: Text("Kết nối với CMC Authenticator"),
                   ),
                   ElevatedButton(
                     onPressed: () async {
